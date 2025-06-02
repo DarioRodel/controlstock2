@@ -133,6 +133,14 @@ class ProductoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     context_object_name = 'productos'
     paginate_by = 20
 
+    def post(self, request, *args, **kwargs):
+        # Recogemos los IDs de los checkboxes
+        ids = request.POST.getlist('selected_products')
+        if ids:
+            # Borrado masivo
+            Producto.objects.filter(pk__in=ids).delete()
+        # Volver a GET para renderizar la lista actualizada
+        return self.get(request, *args, **kwargs)
     def dispatch(self, request, *args, **kwargs):
         if request.user.rol not in ['admin', 'ventas']:
             return render(request, 'stock/403.html',

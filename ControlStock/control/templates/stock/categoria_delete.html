@@ -1,192 +1,97 @@
-{% block content %}
+{% load static %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Eliminar Categoría – InventarioPro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% include 'partials/topbar.html' %}
+    {% include 'partials/sidebar.html' %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    <!-- Bootstrap & FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="../../static/dark/js/darkmode.js" defer></script>
+    <!-- CSS del dashboard (sidebar/topbar) y específico -->
 
-    <style>
-        /* Estilo para la tarjeta contenedora principal. */
-        .card {
-            background-color: var(--card-bg); /* Usa la variable de color de fondo de la tarjeta. */
-            border: 1px solid var(--input-border); /* Borde de 1px con el color del borde de los inputs. */
-            box-shadow: 0 4px 6px -1px var(--shadow-color); /* Sombra suave usando la variable de color de sombra. */
-            border-radius: var(--card-radius); /* Bordes redondeados con la variable definida. */
-        }
+    <link rel="stylesheet" href="{% static 'css/categoria_delete.css' %}">
 
-        /* Definición de variables CSS (modo claro por defecto). */
-        :root {
-            --primary-color: #4CAF50; /* Color primario (verde). */
-            --secondary-color: #2196F3; /* Color secundario (azul). */
-            --accent-color: #FF9800; /* Color de acento (naranja). */
-            --danger-color: #f44336; /* Color para acciones peligrosas (rojo). */
-            --background-color: #f4f7fb; /* Color de fondo general. */
-            --card-radius: 8px; /* Radio de las esquinas de las tarjetas. */
-            --shadow-color: rgba(0, 0, 0, 0.1); /* Color de la sombra. */
-            --card-bg: #ffffff; /* Color de fondo de las tarjetas (blanco). */
-            --text-color: #2d3748; /* Color del texto principal. */
-            --card-hover: rgba(0, 0, 0, 0.03); /* Color de fondo al pasar el ratón sobre las tarjetas. */
-            --light-bg: #f8f9fa; /* Otro color de fondo claro. */
-            --success-bg: #d1e7dd; /* Color de fondo para mensajes de éxito. */
-            --warning-bg: #fff3cd; /* Color de fondo para mensajes de advertencia. */
-            --danger-bg: #f8d7da; /* Color de fondo para mensajes de error. */
-            --input-bg: #ffffff; /* Color de fondo de los campos de formulario. */
-            --input-border: #e2e8f0; /* Color del borde de los campos de formulario. */
-            --placeholder-color: #94a3b8; /* Color del texto de ejemplo en los campos. */
-            --table-header-bg: #f8f9fa; /* Color de fondo del encabezado de las tablas. */
-            --table-border: #e9ecef; /* Color del borde de las tablas. */
-            --font-size-base: 1rem; /* Tamaño base de fuente (1rem = 16px). */
-            --font-size-lg: 1.25rem; /* Tamaño de fuente más grande para títulos y encabezados. */
-        }
+    <!-- Darkmode script -->
+    <script src="{% static 'dark/js/darkmode.js' %}" defer></script>
+</head>
+<body>
 
-        /* Estilos específicos para el modo oscuro (cuando el body tiene el atributo data-theme="dark"). */
-        body[data-theme="dark"] {
-            --background-color: #121212; /* Fondo oscuro. */
-            --card-bg: #1e1e2f; /* Fondo oscuro para las tarjetas. */
-            --text-color: #e0e0e0; /* Color del texto claro. */
-            --shadow-color: rgba(255, 255, 255, 0.05); /* Color de la sombra claro. */
-            --card-hover: rgba(255, 255, 255, 0.08); /* Color de fondo claro al pasar el ratón. */
-            --light-bg: #2d2d2d; /* Otro color de fondo oscuro. */
-            --success-bg: #1a3a2e; /* Color de fondo oscuro para éxito. */
-            --warning-bg: #4d3d17; /* Color de fondo oscuro para advertencia. */
-            --danger-bg: #4a2527; /* Color de fondo oscuro para error. */
-            --input-bg: #2d2d2d; /* Color de fondo oscuro para los inputs. */
-            --input-border: #3d3d3d; /* Color del borde oscuro para los inputs. */
-            --placeholder-color: #a0aec0; /* Color del placeholder claro. */
-            --table-header-bg: #2d2d2d; /* Color de fondo oscuro para el encabezado de las tablas. */
-            --table-border: #404040; /* Color del borde oscuro para las tablas. */
-        }
 
-        /* Estilos generales del body (fondo y color del texto con transición suave). */
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-            font-size: var(--font-size-base); /* Usar el tamaño base de la fuente. */
-        }
+<!-- CONTENIDO PRINCIPAL -->
+<div class="content container py-5">
+{#    <!-- Dark Mode Toggle -->#}
+{#    <div class="form-check form-switch ms-auto mb-4">#}
+{#        <input class="form-check-input" type="checkbox" id="darkModeToggle">#}
+{#        <label class="form-check-label" for="darkModeToggle">#}
+{#            <i class="fas fa-moon me-1"></i>Modo oscuro#}
+{#        </label>#}
+{#    </div>#}
 
-        /* Re-estilo de la tarjeta con transición para el cambio de tema. */
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--shadow-color);
-            box-shadow: 0 4px 6px -1px var(--shadow-color);
-            transition: background-color 0.3s;
-            border-radius: var(--card-radius);
-        }
+    <h2 class="fw-bold mb-4 text-center fs-1 text-primary">
+        <i class="fas fa-exclamation-triangle me-2"></i>Eliminar Categoría
+    </h2>
 
-        /* Estilos para hacer que los textos sean más grandes en pantallas grandes. */
-        .card-body h5, .fw-bold, h2 {
-            font-size: var(--font-size-lg); /* Aumentamos el tamaño de las fuentes en pantallas grandes. */
-        }
-
-        /* Diseño de la tarjeta de confirmación más grande en pantallas medianas y grandes. */
-        .container {
-            max-width: 1200px; /* Aumentamos el ancho del contenedor. */
-            padding: 2rem 1.5rem; /* Mayor relleno en todos los lados. */
-        }
-
-        /* Aumentar tamaño de las fuentes en dispositivos medianos (tablets). */
-        @media (min-width: 768px) {
-            body {
-                font-size: 1.25rem; /* Fuentes más grandes para pantallas medianas. */
-            }
-
-            .card-body h5, .fw-bold, h2 {
-                font-size: 1.5rem; /* Títulos y encabezados más grandes. */
-            }
-        }
-
-        /* Estilos para el modo oscuro y otros tamaños en pantallas grandes */
-        @media (min-width: 1200px) {
-            body {
-                font-size: 1.5rem; /* Fuentes más grandes en pantallas grandes (desktops). */
-            }
-        }
-
-        /* Estilos para las filas de la tabla al pasar el ratón (no se usa directamente en este formulario, pero está presente). */
-        .table-hover tbody tr:hover {
-            --bs-table-accent-bg: var(--card-hover);
-            color: var(--text-color);
-        }
-
-        /* Estilo para el borde inferior del encabezado de tablas sin bordes (no se usa directamente aquí). */
-        .table-borderless thead th {
-            border-bottom: 2px solid var(--table-border) !important;
-        }
-
-        /* Estilos para las celdas de la tabla (no se usa directamente aquí). */
-        .table td, .table th {
-            vertical-align: middle;
-            padding: 1rem;
-            background-color: var(--card-bg);
-        }
-
-        /* Ajustes para dispositivos móviles en tablas (no se usa directamente aquí). */
-        @media (max-width: 768px) {
-            .table td, .table th {
-                padding: 0.75rem;
-            }
-        }
-    </style>
-
-    <div class="container py-5">
-        <div class="form-check form-switch ms-auto mb-2">
-        <input class="form-check-input" type="checkbox" id="darkModeToggle">
-        <label class="form-check-label" for="darkModeToggle">
-            <i class="fas fa-moon me-1"></i>Modo oscuro
-        </label>
-    </div>
-
-        <h2 class="fw-bold mb-4 text-center fs-1" style="color: var(--primary-color);">
-            <i class="fas fa-exclamation-triangle me-2"></i>Eliminar Categoría
-        </h2>
-
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h5 class="text-center mb-4 fs-3" style="color: var(--text-color);">
-                    ¿Estás seguro de que deseas eliminar la categoría <strong>{{ object.nombre }}</strong>?
-                </h5>
-
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="d-flex justify-content-center gap-3">
-                        <button type="submit" class="btn btn-danger btn-lg px-5 py-2 fs-3"
-                                style="background-color: var(--danger-color); border-color: var(--danger-color);">
-                            <i class="fas fa-trash-alt me-2"></i> Eliminar
-                        </button>
-                        <a href="{% url 'stock:categoria_list' %}"
-                           class="btn btn-lg px-5 py-2 fs-3"
-                           style="background-color: var(--card-bg);
-                              border: 2px solid var(--input-border);
-                              color: var(--text-color);">
-                            <i class="fas fa-arrow-left me-2"></i> Cancelar
-                        </a>
-                    </div>
-                </form>
-            </div>
+    <div class="card border-0 shadow-sm mx-auto" style="max-width:600px;">
+        <div class="card-body">
+            <h5 class="text-center mb-4 fs-3 text-dark">
+                ¿Estás seguro de que deseas eliminar la categoría
+                <strong>{{ object.nombre }}</strong>?
+            </h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger btn-lg px-5 py-2 fs-3">
+                        <i class="fas fa-trash-alt me-2"></i>Eliminar
+                    </button>
+                    <a href="{% url 'stock:categoria_list' %}"
+                       class="btn btn-light btn-lg px-5 py-2 fs-3">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        // Dark Mode Toggle - Código Javascript para controlar el modo oscuro.
-        const toggle = document.getElementById('darkModeToggle'); // Obtiene el checkbox del modo oscuro.
-        const currentTheme = localStorage.getItem('theme'); // Revisa si hay un tema guardado en el navegador.
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Oculta scroll horizontal
+    document.documentElement.style.overflowX = 'hidden';
 
-        // Si el tema guardado es "dark", activa el modo oscuro al cargar la página.
-        if (currentTheme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark'); // Añade un atributo al body para activar los estilos oscuros.
-            toggle.checked = true; // Marca el checkbox como activado.
-        }
+    // Topbar dark mode toggle
+    const topbarToggle = document.getElementById('darkModeToggleTopbar');
+    topbarToggle.addEventListener('click', () => {
+        const isDark = document.body.toggleAttribute('data-theme', 'dark');
+        topbarToggle.innerHTML = isDark
+            ? '<i class="fas fa-sun"></i>'
+            : '<i class="fas fa-moon"></i>';
+    });
 
-        // Escucha los cambios en el checkbox del modo oscuro.
-        toggle.addEventListener('change', () => {
-            if (toggle.checked) {
-                // Si se activa, establece el tema a "dark" y lo guarda.
-                document.body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                // Si se desactiva, elimina el atributo y guarda el tema como "light".
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-            }
-        });
-    </script>
-{% endblock %}
+    // Page dark mode toggle
+    const pageToggle = document.getElementById('darkModeToggle');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        pageToggle.checked = true;
+        topbarToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+    pageToggle.addEventListener('change', () => {
+        const dark = pageToggle.checked;
+        document.body.toggleAttribute('data-theme', 'dark', dark);
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        topbarToggle.innerHTML = dark
+            ? '<i class="fas fa-sun"></i>'
+            : '<i class="fas fa-moon"></i>';
+    });
+</script>
+</body>
+</html>

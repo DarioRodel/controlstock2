@@ -1,1085 +1,393 @@
 {% load static %}
 {% load widget_tweaks %}
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="{% static 'dark/js/darkmode.js' %}" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos – InventarioPro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<div class="container-fluid py-4">
-    <!-- Dark Mode Toggle -->
-    <div class="form-check form-switch ms-auto mb-3">
-        <input class="form-check-input" type="checkbox" id="darkModeToggle">
-        <label class="form-check-label" for="darkModeToggle"><i class="fas fa-moon me-2"></i>Modo oscuro</label>
-    </div>
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Header con Selector de Columnas -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <h2 class="fw-bold text-primary d-flex align-items-center mb-0 fs-2 flex-shrink-0">
-            <i class="fas fa-boxes me-2 fs-3 fs-md-1"></i> Productos
+    <!-- CSS compartido -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/producto_list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bars.css' %}">
+
+    <!-- Darkmode & Barcode -->
+    <script src="{% static 'dark/js/darkmode.js' %}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" defer></script>
+
+</head>
+<body>
+
+<!-- Topbar y Sidebar izquierdo -->
+{% include 'partials/topbar.html' %}
+{% include 'partials/sidebar.html' %}
+
+<!-- Contenido principal -->
+<div class="content container-fluid py-4">
+    {% block content %}
+        <!-- Header -->
+         <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary mb-0 fs-2">
+          <i class="fas fa-boxes me-2 fs-3"></i> Productos
         </h2>
 
-        <div class="d-flex flex-wrap gap-2">
-            <!-- Selector de Columnas -->
-            <div class="dropdown">
-                <button class="btn btn-secondary shadow-sm dropdown-toggle" type="button"
-                        id="columnSelector" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-cog me-2"></i>Columnas
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="columnSelector"
-                    id="columnSelectorMenu" style="min-width: 220px;">
-                    {% for col in available_columns %}
-                        <li class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox"
-                                   value="{{ col.key }}" id="col-{{ col.key }}" data-column="{{ col.key }}" checked>
-                            <label class="form-check-label" for="col-{{ col.key }}">
-                                {{ col.label }}
-                            </label>
+        <div class="d-flex gap-2">
+          <!-- Botón filtros -->
+          <button class="btn btn-outline-primary" id="openFilterSidebar">
+            <i class="fas fa-filter me-1"></i> Filtros
+          </button>
+
+          <!-- Botón borrar seleccionados -->
+           <form id="bulkDeleteForm"
+       method="post"
+      action="{% url 'stock:producto_list' %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn btn-outline-danger"
+                    id="bulkDeleteBtn"
+                    disabled>
+              <i class="fas fa-trash-alt"></i> Eliminar seleccionados
+            </button>
+          </form>
+        </div>
+      </div>
+
+
+
+
+
+       <!-- Tabla con checkboxes -->
+        <div class="card border-0 shadow-sm">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light text-uppercase small text-muted">
+                <tr>
+                  <th class="text-center">
+                    <input type="checkbox" id="selectAll">
+                  </th>
+                  <th><i class="fas fa-image me-2"></i>Imagen</th>
+                  <th><i class="fas fa-barcode me-2"></i>Código</th>
+                  <th><i class="fas fa-signature me-2"></i>Nombre</th>
+                  <th><i class="fas fa-folder-open me-2"></i>Categoría</th>
+                  <th><i class="fas fa-tags me-2"></i>Atributos</th>
+                  <th><i class="fas fa-cubes me-2"></i>Stock</th>
+                  <th><i class="fas fa-shield-alt me-2"></i>Estado</th>
+                  <th><i class="fas fa-cogs me-2"></i>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for producto in productos %}
+                  <tr class="text-center">
+                    <td>
+                      <input type="checkbox"
+                             class="row-checkbox"
+                             name="selected_products"
+                             value="{{ producto.pk }}">
+                    </td>
+                    <td>
+                      {% if producto.imagen %}
+                        <img src="{{ producto.imagen.url }}"
+                             class="img-thumbnail rounded-circle"
+                             style="width:50px;height:50px;object-fit:cover;">
+                      {% else %}
+                        <i class="fas fa-camera text-muted"></i>
+                      {% endif %}
+                    </td>
+                    <td>{{ producto.codigo_barras }}</td>
+                    <td>{{ producto.nombre }}</td>
+                    <td>
+                      <span class="badge rounded-pill"
+                            style="background-color:{{ producto.categoria.color|default:'#ccc' }};color:#fff;">
+                        {{ producto.categoria.nombre|default:"—" }}
+                      </span>
+                    </td>
+                    <td>
+                      {% for pa in producto.productoatributo_set.all %}
+                        <span class="badge rounded-pill"
+                              style="background-color:{{ pa.opcion.color|default:'#eee' }};color:#000;">
+                          {{ pa.opcion.valor }}
+                        </span>
+                      {% endfor %}
+                    </td>
+                    <td>{{ producto.stock_actual }}</td>
+                    <td>{{ producto.get_estado_display }}</td>
+                    <td>
+                      <a href="{% url 'stock:producto_edit' producto.pk %}"
+                         class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i>
+                      </a>
+
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                      ¡No hay productos!
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+        <div class="dropdown mb-3">
+  <button class="btn btn-secondary dropdown-toggle" type="button"
+          id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-file-export me-2"></i>Exportar Productos
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="exportDropdown"
+      data-bs-flip="false" data-bs-boundary="viewport">
+    <li>
+      <a class="dropdown-item"
+         href="{% url 'stock:export_productos_csv' %}?search={{ request.GET.search }}&categoria={{ request.GET.categoria }}&estado={{ request.GET.estado }}">
+        <i class="fas fa-file-csv me-2"></i>CSV
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item"
+         href="{% url 'stock:export_productos_excel' %}?search={{ request.GET.search }}&categoria={{ request.GET.categoria }}&estado={{ request.GET.estado }}">
+        <i class="fas fa-file-excel me-2"></i>Excel
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item"
+         href="{% url 'stock:export_productos_pdf' %}?search={{ request.GET.search }}&categoria={{ request.GET.categoria }}&estado={{ request.GET.estado }}">
+        <i class="fas fa-file-pdf me-2"></i>PDF
+      </a>
+    </li>
+  </ul>
+</div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}">‹</a>
+                        </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
                         </li>
                     {% endfor %}
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}">›</a>
+                        </li>
+                    {% endif %}
                 </ul>
+            </nav>
+
+        {% endif %}
+    {% endblock %}
+</div>
+
+<!-- Sidebar derecha: filtros -->
+<aside class="filter-sidebar" id="filterSidebar">
+    <div class="tabs">
+        <i class="fas fa-filter active" id="tabProductFilters" title="Filtros de Productos"></i>
+        <i class="fas fa-columns" id="tabColumnFilters" title="Filtros de Columnas"></i>
+    </div>
+    <!-- PRODUCT FILTERS -->
+    <div class="filters-panel" id="productFilters">
+        <h5>Filtrar Productos</h5>
+        <form id="formProductFilters" method="get">
+            <div class="mb-3">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="search" class="form-control"
+                       value="{{ request.GET.search }}">
             </div>
-
-            <a href="{% url 'stock:dashboard' %}" class="btn btn-light border shadow-sm d-flex align-items-center">
-                <i class="fas fa-arrow-left me-2"></i> Volver al Inicio
-            </a>
-            <a href="{% url 'stock:producto_create' %}" class="btn btn-success shadow-sm">
-                <i class="fas fa-plus-circle me-2"></i> Nuevo Producto
-            </a>
-            <a href="{% url 'stock:atributo_list' %}" class="btn btn-success shadow-sm">
-                <i class="fas fa-tag me-2"></i> Ver Atributos
-            </a>
-        </div>
-    </div>
-
-    <!-- Filtros -->
-
-    <div class="card border-0 shadow-lg mb-4">
-        <div class="card-body p-4">
-            <form method="get">
-                <div class="row g-4">
-                    <!-- Fila Principal de Filtros -->
-                    <div class="col-12">
-                        <div class="d-flex flex-wrap gap-3 align-items-end">
-                            <!-- Buscador -->
-                            <div class="flex-grow-1" style="min-width: 280px;">
-                                <label class="form-label fw-medium text-muted mb-2">Buscar producto</label>
-                                <div class="input-group input-group-lg shadow-sm">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-primary"></i>
-                                </span>
-                                    <input type="text" name="search" class="form-control border-start-0 ps-0"
-                                           placeholder="Nombre, código o descripción..."
-                                           value="{{ request.GET.search }}">
-                                </div>
+            <div class="mb-3">
+                <label class="form-label">Categoría</label>
+                <select name="categoria" class="form-select">
+                    <option value="">Todas</option>
+                    {% for cat in categorias %}
+                        <option value="{{ cat.id }}"
+                                {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>
+                            {{ cat.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos</option>
+                    {% for valor,nombre in estados %}
+                        <option value="{{ valor }}" {% if request.GET.estado == valor %}selected{% endif %}>
+                            {{ nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Atributo</label>
+                <select name="atributo" class="form-select">
+                    <option value="">Todos</option>
+                    {% for atributo in atributos %}
+                        <option value="{{ atributo.id }}"
+                                {% if request.GET.atributo == atributo.id|stringformat:"s" %}selected{% endif %}>
+                            {{ atributo.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Opciones</label>
+                <div>
+                    {% if opciones %}
+                        {% for opcion in opciones %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                       name="opcion" value="{{ opcion.id }}"
+                                       id="opt{{ opcion.id }}"
+                                       {% if opcion.id|stringformat:"s" in opciones_seleccionadas %}checked{% endif %}>
+                                <label class="form-check-label" for="opt{{ opcion.id }}">
+                                    {{ opcion.valor }}
+                                </label>
                             </div>
-
-                            <!-- Selectores -->
-                            <div class="d-flex flex-wrap gap-3">
-                                <!-- Categoría -->
-                                <div style="min-width: 200px;">
-                                    <label class="form-label fw-medium text-muted mb-">Categoría</label>
-                                    <div class="input-group shadow-sm">
-                                    <span class="input-group-text bg-white border-end-0">
-                                        <i class="fas fa-layer-group text-primary"></i>
-                                    </span>
-                                        <select name="categoria" class="form-select ps-0">
-                                            <option value="">Todas</option>
-                                            {% for cat in categorias %}
-                                                <option value="{{ cat.id }}"
-                                                        {% if request.GET.categoria == cat.id|stringformat:"s" %}selected{% endif %}>
-                                                    {{ cat.nombre }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Estado -->
-                                <div style="min-width: 180px;">
-                                    <label class="form-label fw-medium text-muted mb-2">Estado</label>
-                                    <div class="input-group shadow-sm">
-                                    <span class="input-group-text bg-white border-end-0">
-                                        <i class="fas fa-chart-line text-primary"></i>
-                                    </span>
-                                        <select name="estado" class="form-select ps-0">
-                                            <option value="">Todos</option>
-                                            {% for valor, nombre in estados %}
-                                                <option value="{{ valor }}"
-                                                        {% if request.GET.estado == valor %}selected{% endif %}>
-                                                    {{ nombre }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botones de Acción -->
-                            <div class="d-flex gap-2 align-self-end">
-                                <button type="submit" class="btn btn-primary px-4 shadow-sm">
-                                    <i class="fas fa-filter me-2"></i>Filtrar
-                                </button>
-                                <a href="{% url 'stock:producto_list' %}" class="btn btn-outline-secondary px-4">
-                                    <i class="fas fa-rotate-left me-2"></i>Limpiar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filtros Avanzados -->
-                    <div class="col-12">
-                        <div class="accordion" id="advancedFilters">
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed bg-transparent shadow-none px-0 py-2"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#collapseAdvanced"
-                                            aria-expanded="false">
-                                        <i class="fas fa-sliders-h me-2 text-primary"></i>
-                                        Filtros Avanzados
-                                    </button>
-                                </h2>
-                                <div id="collapseAdvanced" class="accordion-collapse collapse"
-                                     data-bs-parent="#advancedFilters">
-                                    <div class="accordion-body pt-3 px-0">
-                                        <div class="row g-4">
-                                            <!-- Atributo -->
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-medium text-muted mb-2">Atributo</label>
-                                                <div class="input-group shadow-sm">
-                                                <span class="input-group-text bg-white border-end-0">
-                                                    <i class="fas fa-tag text-primary"></i>
-                                                </span>
-                                                    <select name="atributo" class="form-select ps-0"
-                                                            id="id_atributo_select">
-                                                        <option value="">Seleccionar</option>
-                                                        {% for atributo in atributos %}
-                                                            <option value="{{ atributo.id }}"
-                                                                    {% if request.GET.atributo == atributo.id|stringformat:"s" %}selected{% endif %}>
-                                                                {{ atributo.nombre }}
-                                                            </option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- Opciones -->
-                                            <div class="col-md-8">
-                                                <label class="form-label fw-medium text-muted mb-2">Opciones</label>
-                                                <div class="d-flex flex-wrap gap-2">
-                                                    {% if opciones %}
-                                                        {% for opcion in opciones %}
-                                                            <div class="form-check form-check-inline">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       name="opcion" value="{{ opcion.id }}"
-                                                                       id="opcion-{{ opcion.id }}"
-                                                                       {% if opcion.id|stringformat:"s" in opciones_seleccionadas %}checked{% endif %}>
-                                                                <label class="form-check-label"
-                                                                       for="opcion-{{ opcion.id }}">
-                                                            <span class="badge bg-primary bg-opacity-10 text-primary
-                                                                      px-3 py-2 rounded-pill">
-                                                                {{ opcion.valor }}
-                                                                {% if opcion.color %}
-                                                                    <span class="color-dot ms-2"
-                                                                          style="background-color: {{ opcion.color }}"></span>
-                                                                {% endif %}
-                                                            </span>
-                                                                </label>
-                                                            </div>
-                                                        {% endfor %}
-                                                    {% else %}
-                                                        <div class="text-muted small">
-                                                            Selecciona un atributo primero
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <small class="text-muted">Selecciona un atributo</small>
+                    {% endif %}
                 </div>
-            </form>
-        </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter me-1"></i> Aplicar
+            </button>
+        </form>
     </div>
-
-
-    <!-- Tabla de Productos -->
-    <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-uppercase small text-muted">
-                <tr>
-                    <th class="text-center fs-5" data-column="imagen"><i class="fas fa-image me-2"></i>Imagen</th>
-                    <th class="text-center fs-5" data-column="codigo"><i class="fas fa-barcode me-2"></i>Código</th>
-                    <th class="text-center fs-5" data-column="nombre"><i class="fas fa-signature me-2"></i>Nombre</th>
-                    <th class="text-center fs-5" data-column="categoria"><i class="fas fa-folder-open me-2"></i>Categoría
-                    </th>
-                    <th class="text-center fs-5" data-column="atributos"><i class="fas fa-tags me-2"></i>Atributos</th>
-                    <th class="text-center fs-5" data-column="stock"><i class="fas fa-cubes me-2"></i>Stock</th>
-                    <th class="text-center fs-5" data-column="estado"><i class="fas fa-shield-alt me-2"></i>Estado</th>
-                    <th class="text-center fs-5" data-column="acciones"><i class="fas fa-cogs me-2"></i>Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for producto in productos %}
-                    <tr class="hover-highlight fs-5 text-center">
-                        <!-- Imagen -->
-                        <td class="text-center" data-column="imagen" data-label="Imagen">
-                            {% if producto.imagen %}
-                                <img src="{{ producto.imagen.url }}" class="img-thumbnail rounded-circle shadow-sm"
-                                     style="width: 50px; height: 50px; object-fit: cover;">
-                            {% else %}
-                                <div class="no-image-placeholder rounded-circle d-flex align-items-center justify-content-center text-muted"
-                                     style="width: 50px; height: 50px;">
-                                    <i class="fas fa-camera"></i>
-                                </div>
-                            {% endif %}
-                        </td>
-
-                        <!-- Código -->
-                        <td data-column="codigo" data-label="Código">{{ producto.codigo_barras }}</td>
-
-                        <!-- Nombre -->
-                        <td data-column="nombre" data-label="Nombre">{{ producto.nombre }}</td>
-
-                        <!-- Categoría -->
-                        <td data-column="categoria" data-label="Categoría">
-    <span class="badge px-3 py-2 rounded-pill fs-5"
-          style="background-color: {{ producto.categoria.color|default:'#eee' }}; color: #fff;">
-        {{ producto.categoria.nombre|default:"-" }}
-    </span>
-                        </td>
-
-                        <!-- Atributos -->
-                        <td data-column="atributos" data-label="Atributos" class="text-center">
-                            <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                {% for pa in producto.productoatributo_set.all %}
-                                    {% if pa.opcion.color %}
-                                        {% with color=pa.opcion.color|stringformat:"s"|lower %}
-                                            <span class="badge fs-5 py-2 px-3 rounded-pill"
-                                                  style="background-color: {{ pa.opcion.color }};
-                                                          {% if color == '#fff' or color == '#ffffff' or color == 'rgb(255,255,255)' %}color: #000;{% else %}color: #fff;{% endif %}">
-                        <span class="fw-semibold"></span>
-                        {{ pa.opcion.valor|default:"N/A" }}
-                    </span>
-                                        {% endwith %}
-                                    {% else %}
-                                        <span class="badge bg-light bg-opacity-10 text-dark fs-5 py-2 px-3 rounded-pill">
-                    <span class="fw-semibold"></span>
-                    {{ pa.opcion.valor|default:"N/A" }}
-                </span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </td>
-                        <!-- Stock -->
-                        <td class="text-center" data-column="stock" data-label="Stock">
-                            <span class="badge bg-light text-dark fs-5 dark-mode-badge">
-                                <i class="fas fa-cube me-1"></i>{{ producto.stock_actual }}
-                            </span>
-                        </td>
-
-                        <!-- Estado -->
-                        <td class="text-center" data-column="estado" data-label="Estado">
-                            <span class="badge py-2 px-3 rounded-pill
-                                {% if producto.estado == 'NORMAL' %} bg-success-subtle text-success
-                                {% elif producto.estado == 'BAJO' %} bg-warning-subtle text-warning
-                                {% else %} bg-danger-subtle text-danger {% endif %}">
-                                <i class="fas
-                                    {% if producto.estado == 'NORMAL' %} fa-check-circle
-                                    {% elif producto.estado == 'BAJO' %} fa-exclamation-triangle
-                                    {% else %} fa-times-circle {% endif %} me-2"></i>
-                                {{ producto.get_estado_display }}
-                            </span>
-                        </td>
-
-                        <!-- Acciones -->
-                        <td class="text-center" data-column="acciones" data-label="Acciones">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a href="{% url 'stock:producto_delete' producto.pk %}"
-                                   class="btn btn-sm btn-outline-danger rounded-circle p-2">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                                <a href="{% url 'stock:producto_edit' producto.pk %}"
-                                   class="btn btn-sm btn-outline-secondary rounded-circle"
-                                   data-bs-toggle="tooltip" title="Editar Producto">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5 bg-light text-muted">
-                            <div class="mb-4">
-                                <i class="fas fa-box-open fa-3x mb-3 text-primary"></i>
-                            </div>
-                            <p class="h5 mb-3">¡Aún no tienes productos!</p>
-                            <p class="mb-4">Puedes agregar productos desde el botón de abajo.</p>
-                            <a href="{% url 'stock:producto_create' %}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus-circle me-2"></i> Agregar Nuevo Producto
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
-    {% if is_paginated %}
-        <nav class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link"
-                           href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}&categoria={{ request.GET.categoria }}&estado={{ request.GET.estado }}">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                {% endif %}
-                {% for num in page_obj.paginator.page_range %}
-                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                        <a class="page-link"
-                           href="?page={{ num }}&search={{ request.GET.search }}&categoria={{ request.GET.categoria }}&estado={{ request.GET.estado }}">{{ num }}</a>
-                    </li>
-                {% endfor %}
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link"
-                           href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}&categoria={{ request.GET.categoria }}&estado={{ request.GET.estado }}">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
-    {% endif %}
-    <br>
-    <div class="dropdown mb-3">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown"
-                aria-expanded="false">
-            <i class="fas fa-file-export me-2"></i>Exportar Productos
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-            <li><a class="dropdown-item" href="{% url 'stock:export_productos_csv' %}"><i
-                    class="fas fa-file-csv me-2"></i>CSV</a></li>
-            <li><a class="dropdown-item" href="{% url 'stock:export_productos_excel' %}"><i
-                    class="fas fa-file-excel me-2"></i>Excel</a></li>
-            <li><a class="dropdown-item" href="{% url 'stock:export_productos_pdf' %}"><i
-                    class="fas fa-file-pdf me-2"></i>PDF</a></li>
+    <!-- COLUMN FILTERS -->
+    <div class="filters-panel hidden" id="columnFilters">
+        <h5>Filtrar Columnas</h5>
+        <ul class="list-unstyled">
+            {% for col in available_columns %}
+                <li class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox"
+                           value="{{ col.key }}" id="col{{ col.key }}" data-column="{{ col.key }}"
+                           checked>
+                    <label class="form-check-label" for="col{{ col.key }}">
+                        {{ col.label }}
+                    </label>
+                </li>
+            {% endfor %}
         </ul>
     </div>
-</div>
+    <div class="clear-btn">
+        <i class="fas fa-eraser" id="clearFilters" title="Limpiar Filtros"></i>
+    </div>
+</aside>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const btn = document.getElementById('toggleOpciones');
-        const container = document.getElementById('opcionesContainer');
-        btn.addEventListener('click', function () {
-            if (container.style.display === 'none' || container.style.display === '') {
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
+     document.addEventListener('DOMContentLoaded', () => {
+      const selectAll     = document.getElementById('selectAll'),
+            rowCheckboxes = document.querySelectorAll('.row-checkbox'),
+            bulkBtn       = document.getElementById('bulkDeleteBtn'),
+            bulkForm      = document.getElementById('bulkDeleteForm'),
+            productsForm  = document.getElementById('productsForm');
+
+      function updateBulkButton() {
+        const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+        bulkBtn.disabled = !anyChecked;
+      }
+
+      // select all / none
+      selectAll.addEventListener('change', () => {
+        rowCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+        updateBulkButton();
+      });
+
+      rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          // si alguno desmarca, descheckea el selectAll
+          if (!cb.checked) selectAll.checked = false;
+          // si todos marcados, checkea selectAll
+          else if (Array.from(rowCheckboxes).every(x => x.checked)) selectAll.checked = true;
+          updateBulkButton();
+        });
+      });
+
+      // cuando envíes el bulkForm, inyecta en él los selected_products
+      bulkForm.addEventListener('submit', e => {
+        e.preventDefault();
+        // limpia inputs anteriores
+        Array.from(bulkForm.querySelectorAll('input[name="selected_products"]')).forEach(i=>i.remove());
+        // clona los checked del productsForm
+        rowCheckboxes.forEach(cb => {
+          if (cb.checked) {
+            const hidden = document.createElement('input');
+            hidden.type  = 'hidden';
+            hidden.name  = 'selected_products';
+            hidden.value = cb.value;
+            bulkForm.append(hidden);
+          }
+        });
+        bulkForm.submit();
+      });
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterSidebar = document.getElementById('filterSidebar'),
+            openBtn = document.getElementById('openFilterSidebar'),
+            tabProd = document.getElementById('tabProductFilters'),
+            tabCols = document.getElementById('tabColumnFilters'),
+            panelProd = document.getElementById('productFilters'),
+            panelCols = document.getElementById('columnFilters'),
+            clearBtn = document.getElementById('clearFilters');
+
+        // Abrir/cerrar sidebar
+        openBtn.addEventListener('click', () => {
+            filterSidebar.classList.toggle('open');
+        });
+
+        // Cambiar pestañas
+        [tabProd, tabCols].forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabProd.classList.toggle('active', tab === tabProd);
+                tabCols.classList.toggle('active', tab === tabCols);
+                panelProd.classList.toggle('hidden', tab !== tabProd);
+                panelCols.classList.toggle('hidden', tab !== tabCols);
+            });
+        });
+
+        // Limpiar filtros
+        clearBtn.addEventListener('click', () => {
+            document.getElementById('formProductFilters').reset();
+            document.querySelectorAll('.column-toggle').forEach(chk => {
+                chk.checked = true;
+                document.querySelectorAll(`[data-column="${chk.value}"]`)
+                    .forEach(el => el.style.display = '');
+            });
+        });
+
+        // Toggle columnas
+        document.querySelectorAll('.column-toggle').forEach(chk => {
+            chk.addEventListener('change', () => {
+                document.querySelectorAll(`[data-column="${chk.value}"]`)
+                    .forEach(el => el.style.display = chk.checked ? '' : 'none');
+            });
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (!filterSidebar.contains(e.target) && !openBtn.contains(e.target)) {
+                filterSidebar.classList.remove('open');
             }
         });
-    });
-    // Dark Mode Toggle
-    const toggle = document.getElementById('darkModeToggle');
-    const currentTheme = localStorage.getItem('theme');
-
-    if (currentTheme === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
-        toggle.checked = true;
-    }
-
-    toggle.addEventListener('change', () => {
-        if (toggle.checked) {
-            document.body.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-        }
-    });
-
-    // Selector de Columnas
-    document.addEventListener('DOMContentLoaded', function () {
-        // Cargar preferencias
-        const savedColumns = JSON.parse(localStorage.getItem('visibleColumns')) || {};
-
-        // Inicializar columnas
-        document.querySelectorAll('.column-toggle').forEach(checkbox => {
-            const columnKey = checkbox.dataset.column;
-            const isVisible = savedColumns[columnKey] ?? true;
-
-            checkbox.checked = isVisible;
-            toggleColumn(columnKey, isVisible);
-
-            checkbox.addEventListener('change', function () {
-                toggleColumn(columnKey, this.checked);
-                saveColumnPreferences();
-            });
-        });
-
-        function toggleColumn(columnKey, show) {
-            const selector = `th[data-column="${columnKey}"], td[data-column="${columnKey}"]`;
-            document.querySelectorAll(selector).forEach(el => {
-                el.style.display = show ? '' : 'none';
-            });
-        }
-
-        function saveColumnPreferences() {
-            const columns = {};
-            document.querySelectorAll('.column-toggle').forEach(checkbox => {
-                columns[checkbox.dataset.column] = checkbox.checked;
-            });
-            localStorage.setItem('visibleColumns', JSON.stringify(columns));
-        }
-    });
-
-    // Inicializar tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
-    // Generar códigos de barras
-    window.addEventListener('DOMContentLoaded', () => {
-        JsBarcode(".barcode").init();
     });
 </script>
-<style>
-    /* Variables actualizadas para mejor contraste */
-    :root {
-        --primary-color: #3B82F6;
-        --secondary-color: #6366F1;
-        --accent-color: #10B981;
-        --danger-color: #EF4444;
-        --background-color: #F8FAFC;
-        --card-radius: 12px;
-        --shadow-color: rgba(0, 0, 0, 0.05);
-        --text-color: #1E293B;
-        --table-header-bg: #F1F5F9;
-        --card-bg: #FFFFFF; /* Añadido para el fondo de las "tarjetas" en móvil */
-        --input-border: #E5E7EB; /* Añadido para los bordes en móvil */
-    }
-
-    body[data-theme="dark"] {
-        --primary-color: #60A5FA;
-        --secondary-color: #818CF8;
-        --accent-color: #34D399;
-        --danger-color: #F87171;
-        --background-color: #0F172A;
-        --text-color: #E2E8F0;
-        --table-header-bg: #1E293B;
-        --card-bg: #1C2536; /* Fondo oscuro para las "tarjetas" */
-        --input-border: #374151; /* Bordes oscuros en modo oscuro */
-    }
-
-    body[data-theme="dark"] {
-        background-color: var(--background-color);
-        color: var(--text-color);
-    }
-
-    body[data-theme="dark"] .card {
-        background-color: var(--card-bg);
-        color: var(--text-color);
-    }
-
-    body[data-theme="dark"] .table-light {
-        background-color: var(--table-header-bg);
-        color: var(--text-color);
-    }
-
-    body[data-theme="dark"] .form-control,
-    body[data-theme="dark"] .form-select {
-        background-color: var(--card-bg);
-        color: var(--text-color);
-        border-color: var(--input-border);
-    }
-
-    body[data-theme="dark"] .btn-light {
-        background-color: var(--card-bg);
-        color: var(--text-color);
-        border-color: var(--input-border);
-    }
-
-    body[data-theme="dark"] .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-
-    body[data-theme="dark"] .btn-success {
-        background-color: var(--accent-color);
-        border-color: var(--accent-color);
-        color: white;
-    }
-
-    body[data-theme="dark"] .btn-outline-secondary,
-    body[data-theme="dark"] .btn-outline-danger {
-        border-color: var(--input-border);
-        color: var(--text-color);
-    }
-
-    html, body {
-        width: 100%;
-        overflow-x: hidden; /* evita scroll horizontal */
-    }
-
-    /* Mejoras específicas para el formulario de filtros */
-    .card-body form.row.g-3 {
-        gap: 1rem 1.5rem; /* Más espacio entre columnas */
-    }
-
-    .card-body form .form-label {
-        font-weight: 600;
-        color: var(--text-color);
-    }
-
-    .card-body form input.form-control-lg,
-    .card-body form select.form-select-lg {
-        font-size: 1.15rem;
-        padding: 0.65rem 0.75rem;
-        border-radius: 0.5rem;
-        border: 1px solid var(--input-border);
-        transition: border-color 0.3s ease;
-    }
-
-    .card-body form input.form-control-lg:focus,
-    .card-body form select.form-select-lg:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 8px var(--primary-color);
-        outline: none;
-    }
-
-    .card-body form button.btn-lg {
-        padding: 0.7rem 1.5rem;
-        font-size: 1.15rem;
-        border-radius: 0.5rem;
-        transition: background-color 0.3s ease;
-    }
-
-    .card-body form button.btn-lg:hover {
-        background-color: var(--secondary-color);
-        border-color: var(--secondary-color);
-    }
-
-    /* Modo oscuro: mejora contraste para inputs y selects */
-    body[data-theme="dark"] .card-body form input.form-control-lg,
-    body[data-theme="dark"] .card-body form select.form-select-lg {
-        background-color: var(--card-bg);
-        color: var(--text-color);
-        border-color: var(--input-border);
-    }
-
-    body[data-theme="dark"] .card-body form input.form-control-lg:focus,
-    body[data-theme="dark"] .card-body form select.form-select-lg:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 8px var(--accent-color);
-    }
-
-    /* Flexbox para que los filtros se alineen mejor en pantallas pequeñas */
-    @media (max-width: 991.98px) {
-        .card-body form.row.g-3 {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .card-body form > div[class^="col-"] {
-            flex: 1 1 45%;
-            min-width: 220px;
-        }
-
-        /* Botón filtro al 100% ancho en móvil */
-        .card-body form > div.col-md-2.d-grid {
-            flex: 1 1 100%;
-            min-width: auto;
-        }
-    }
-
-    /* Ajustes para que el select "Opción" se vea deshabilitado claramente */
-    .card-body form select[disabled] {
-        background-color: #e9ecef !important;
-        cursor: not-allowed;
-        opacity: 0.7;
-        color: #6c757d !important;
-    }
-
-    /* Espacio extra para iconos en labels */
-    .form-label i {
-        color: var(--primary-color);
-        margin-right: 0.4rem;
-    }
-
-    /* Ajustes generales para accesibilidad y espaciado */
-    .form-check.form-switch {
-        justify-content: flex-end;
-    }
-
-    /* Mejorar el dropdown exportar para que no quede muy pegado */
-    .dropdown.mb-3 {
-        margin-top: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        line-height: 1.6;
-
-        padding-left: 3em;
-        padding-right: 3em;
-
-    }
-
-    h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: -0.025em;
-        color: var(--text-color);
-    }
-
-    .card {
-        border-radius: var(--card-radius);
-        border: 1px solid var(--input-border);
-        box-shadow: 0 1px 3px 0 var(--shadow-color),
-        0 1px 2px -1px var(--shadow-color);
-    }
-
-    @media (min-width: 768px) and (max-width: 991.98px) {
-        body {
-            margin: 0.5em;
-            padding: 0.5em;
-        }
-
-        td[data-label="Stock"] {
-            font-size: 1.3em; /* Aumentamos el tamaño de la fuente */
-            padding: 0.75rem 0.70rem; /* Aumentamos el padding */
-        }
-
-        /* Aumentamos el tamaño de los inputs en el formulario */
-        .form-control, .form-select {
-            font-size: 1.25rem; /* Aumentamos el tamaño de la fuente */
-            padding: 0.75rem /* Aumentamos el padding */
-        }
-
-        /* Aumentamos el tamaño del botón de filtro */
-        .btn-lg {
-            font-size: 1.25rem; /* Aumentamos el tamaño de la fuente */
-            padding: 0.75rem 1.5rem; /* Aumentamos el padding */
-        }
-
-        /* Aumentar el tamaño de las etiquetas */
-        .form-label {
-            font-size: 1.15rem; /* Aumentamos el tamaño de la fuente */
-        }
-
-        /* Aumentamos la altura de las filas del formulario */
-        .col-md-4, .col-md-3, .col-md-2 {
-            font-size: 1.2rem; /* Aumentamos el tamaño del texto en el formulario */
-        }
-
-        /* Ocultamos encabezado para usar estilo de tarjeta */
-        thead {
-            display: none;
-        }
-
-        body {
-            font-size: 1rem; /* Aumentado el tamaño de fuente en pantallas pequeñas */
-        }
-
-        h2 {
-            font-size: 1.4rem; /* Títulos más grandes en pantallas pequeñas */
-        }
-
-        tbody {
-            display: block;
-        }
-
-        /* Estilo de cada fila como tarjeta */
-        tr {
-            font-size: 1.3em; /* Aumentado el tamaño de la fuente de las filas */
-            display: flex;
-            flex-direction: column;
-            background-color: var(--card-bg);
-            border-radius: var(--card-radius);
-            box-shadow: 0 4px 12px var(--shadow-color);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-            padding: 1rem;
-        }
-
-        /* Estilo de celdas como pares clave/valor */
-        td {
-            font-size: 1.3em; /* Aumentado el tamaño de la fuente de las celdas */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            color: var(--text-color);
-            border-bottom: 1px solid var(--input-border);
-        }
-
-        td:last-child {
-            border-bottom: none;
-        }
-
-        td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: var(--text-color);
-            opacity: 0.75;
-            margin-right: 1rem;
-        }
-
-        /* Oculta columna "Código" para liberar espacio */
-        td[data-label="Código"] svg.barcode {
-            width: 100%;
-            max-width: 220px;
-            height: auto;
-            margin-top: 0.5rem;
-        }
-
-        td[data-label="Stock"] svg.barcode {
-            width: 100%;
-            max-width: 220px;
-            height: auto;
-            margin-top: 0.5rem;
-        }
-
-        /* Estilo para acciones más legible */
-        td[data-label="Acciones"] {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        td[data-label="Acciones"] > div.d-flex {
-            flex-direction: row;
-            gap: 0.75rem;
-        }
-
-        /* Botones más accesibles */
-        .btn-sm {
-            font-size: 1rem; /* Aumentado el tamaño de los botones pequeños */
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-        }
-
-        .btn {
-            font-size: 1.2rem; /* Aumentado el tamaño de los botones grandes */
-            padding: 0.6rem 1.2rem;
-        }
-
-        .btn,
-        input.form-control,
-        select.form-select {
-            font-size: 1.2rem; /* Aumentado el tamaño del texto en formularios y botones */
-        }
-
-        input.form-control,
-        select.form-select {
-            font-size: 1.1rem; /* Aumentado el tamaño del texto en los formularios */
-            padding: 0.75rem 1rem;
-        }
-
-        /* Animación suave para tarjetas y filas */
-        .card, tr, .badge, .btn {
-            transition: box-shadow 0.3s, background-color 0.3s, color 0.3s;
-        }
-
-        /* Hover en filas de la tabla */
-        .table-hover tbody tr:hover {
-            box-shadow: 0 4px 16px var(--shadow-color);
-            background-color: var(--table-header-bg);
-        }
-
-        /* Sombra en badges */
-        .badge {
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.07);
-        }
-
-        /* Separador visual entre filtros y tabla */
-        .card + .card {
-            margin-top: 2rem;
-        }
-
-        /* Placeholder de imagen con degradado animado */
-        .no-image-placeholder {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ef 100%);
-            animation: placeholderPulse 2s infinite alternate;
-        }
-
-        @keyframes placeholderPulse {
-            0% {
-                opacity: 0.8;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
-
-        /* Animación acordeón */
-        .accordion-collapse {
-            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Botón flotante para agregar producto */
-        .fab-add-product {
-            position: fixed;
-            bottom: 2.5rem;
-            right: 2.5rem;
-            z-index: 1050;
-            background: var(--primary-color);
-            color: #fff;
-            border-radius: 50%;
-            width: 64px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            box-shadow: 0 4px 16px var(--shadow-color);
-            transition: background 0.3s;
-        }
-
-        .fab-add-product:hover {
-            background: var(--secondary-color);
-        }
-
-        /* Badges más elegantes */
-        .badge {
-            font-size: 1.2rem; /* Aumentado el tamaño de las etiquetas */
-            padding: 0.5rem 1rem;
-        }
-
-        .table td {
-            white-space: normal; /* permite que el texto haga salto de línea */
-            word-break: break-word; /* rompe palabras largas si es necesario */
-        }
-
-        /* Imagen centrada y pulida */
-        .img-thumbnail {
-            width: 56px; /* Aumentado tamaño de imagen */
-            height: 56px;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 2px 6px var(--shadow-color);
-        }
-
-        .no-image-placeholder {
-            font-size: 1.6rem; /* Aumentado tamaño del icono en el placeholder */
-            width: 56px; /* Aumentado tamaño del placeholder */
-            height: 56px;
-            background-color: var(--table-header-bg);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    }
-
-    /* Filtros - Versión Escritorio */
-    @media (min-width: 992px) {
-        .card-body form.row.g-3 {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            gap: 1.5rem;
-        }
-
-        .card-body form > div[class^="col-"] {
-            flex: 1 1 auto;
-            min-width: 180px;
-            max-width: 280px;
-        }
-
-        .card-body form > div.col-md-2.d-grid {
-            flex: 0 0 auto;
-            width: auto;
-        }
-
-        /* Mejoras en los inputs */
-        .card-body form input.form-control-lg,
-        .card-body form select.form-select-lg {
-            font-size: 1.05rem;
-            padding: 0.65rem 0.75rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .card-body form input.form-control-lg:focus,
-        .card-body form select.form-select-lg:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
-        }
-
-        /* Estilo para los labels */
-        .card-body form .form-label {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Botón de filtro */
-        .card-body form button.btn-lg {
-            padding: 0.65rem 1.25rem;
-            font-size: 1.05rem;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 120px;
-        }
-
-        /* Select de atributo y opción - alineación mejorada */
-        .card-body form select[name="atributo"],
-        .card-body form select[name="opcion"] {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 16px 12px;
-            padding-right: 2.5rem;
-        }
-
-        body[data-theme="dark"] .card-body form select[name="atributo"],
-        body[data-theme="dark"] .card-body form select[name="opcion"] {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-        }
-
-        /* Estado deshabilitado más claro */
-        .card-body form select[disabled] {
-            opacity: 0.7;
-            background-color: #f8f9fa;
-        }
-
-        body[data-theme="dark"] .card-body form select[disabled] {
-            background-color: #2d3748;
-            color: #a0aec0;
-        }
-
-        /* Iconos en los inputs */
-        .card-body form .input-group-text {
-            background-color: #f8f9fa;
-            border-right: none;
-        }
-
-        body[data-theme="dark"] .card-body form .input-group-text {
-            background-color: #2d3748;
-            border-color: #4a5568;
-        }
-    }
-
-    /* Estilos para los Filtros Mejorados */
-    .filter-card {
-        background: var(--card-bg);
-        border-radius: 16px;
-        border: 1px solid var(--input-border);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    }
-
-    .input-group-text {
-        transition: all 0.3s ease;
-        border-color: var(--input-border);
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-    }
-
-    .accordion-button:not(.collapsed) {
-        color: var(--primary-color);
-        background-color: transparent;
-    }
-
-    .accordion-button::after {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    }
-
-    .accordion-button:not(.collapsed)::after {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%233B82F6'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    }
-
-    .color-dot {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        vertical-align: middle;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Efectos hover para los checkboxes de opciones */
-    .form-check-input:checked ~ .badge {
-        background-color: var(--primary-color) !important;
-        color: white !important;
-    }
-
-    .form-check-input:checked ~ .badge .color-dot {
-        border: 2px solid white;
-    }
-
-    /* Transiciones suaves */
-    .form-check-label, .form-check-input, .accordion-button {
-        transition: all 0.3s ease;
-    }
-
-    /* Modo oscuro */
-    body[data-theme="dark"] .form-check-input:checked ~ .badge {
-        background-color: var(--primary-color) !important;
-    }
-
-    body[data-theme="dark"] .accordion-button::after {
-        filter: invert(1);
-    }
-
-    /* Versión pantallas grandes (>= 1200px) */
-    @media (min-width: 1200px) {
-        .card-body form.row.g-3 {
-            gap: 2rem;
-        }
-
-        .card-body form > div[class^="col-"] {
-            min-width: 200px;
-        }
-
-        .card-body form button.btn-lg {
-            min-width: 140px;
-        }
-    }
-
-    /* Estilos para el selector de columnas */
-    #columnSelectorMenu {
-        background-color: var(--card-bg);
-        border: 1px solid var(--input-border);
-        box-shadow: 0 4px 12px var(--shadow-color);
-    }
-
-    .column-toggle:checked + .form-check-label {
-        color: var(--primary-color);
-        font-weight: 500;
-    }
-
-    .form-check-label {
-        color: var(--text-color);
-        transition: color 0.2s ease;
-    }
-
-    .form-check-input:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    .dropdown-item:hover {
-        background-color: var(--table-header-bg);
-    }
-</style>
+</body>
+</html>

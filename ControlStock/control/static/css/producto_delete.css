@@ -1,0 +1,82 @@
+
+:root {
+    --primary-color: #4CAF50;
+    --danger-color: #f44336;
+    --background-color: #f4f7fb;
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --card-hover: rgba(0, 0, 0, 0.03);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+/* Modo oscuro */
+body[data-theme="dark"] {
+    --background-color: #0d1117;
+    --card-bg: #161b22;
+    --text-color: #c9d1d9;
+    --shadow-color: rgba(255, 255, 255, 0.05);
+    --card-hover: rgba(255, 255, 255, 0.05);
+    --primary-color: #58a6ff;
+    --secondary-color: #6e7681;
+    --accent-color: #f78166;
+    --danger-color: #ff7b72;
+
+}
+body[data-theme="dark"] .sidebar .reportes {
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+/* Estilos generales del body. */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    margin-left: 450px;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+/* Estilo de la tarjeta principal. */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--input-border);
+    box-shadow: 0 4px 6px -1px var(--shadow-color);
+    transition: background-color 0.3s;
+}
+
+/* Estilo de las filas de la tabla al pasar el ratón. */
+.table-hover tbody tr:hover {
+    --bs-table-accent-bg: var(--card-hover);
+    color: var(--text-color);
+}
+
+/* Estilo para la cabecera de tablas sin bordes. */
+.table-borderless thead th {
+    border-bottom: 2px solid var(--table-border) !important;
+}
+
+/* Estilos para las celdas de la tabla. */
+.table td, .table th {
+    vertical-align: middle;
+    padding: 1rem;
+    background-color: var(--card-bg);
+}
+
+/* Ajustes para dispositivos móviles en tablas. */
+@media (max-width: 768px) {
+    body {
+        margin: 1em;
+    }
+}

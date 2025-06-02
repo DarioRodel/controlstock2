@@ -1,8 +1,10 @@
 from django import forms  # Importa el módulo de formularios de Django.
+from django.contrib.auth.forms import UserCreationForm
 from django.forms import inlineformset_factory
 
 from .models import MovimientoStock, Producto, Ubicacion, \
-    ProductoAtributo, Atributo, OpcionAtributo  # Importa los modelos relacionados con los formularios.
+    ProductoAtributo, Atributo, OpcionAtributo, \
+    UsuarioPersonalizado  # Importa los modelos relacionados con los formularios.
 from django.forms import BaseInlineFormSet, ValidationError
 
 class MovimientoStockForm(forms.ModelForm):
@@ -167,3 +169,28 @@ class ReporteErrorForm(forms.Form):
         'placeholder': 'tu@correo.com'
     }))  # Campo opcional para el correo electrónico del reportante, con un widget EmailInput y atributos HTML.
 
+
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    telefono = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    departamento = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    rol = forms.ChoiceField(choices=UsuarioPersonalizado.ROLES, widget=forms.Select(attrs={'class': 'form-select'}))
+
+    class Meta:
+        model = UsuarioPersonalizado
+        fields = (
+            'username',
+            'email',
+            'telefono',
+            'departamento',
+            'rol',
+            'password1',
+            'password2',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Añadimos clases de Bootstrap a cada campo
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Usuario'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Repetir contraseña'})

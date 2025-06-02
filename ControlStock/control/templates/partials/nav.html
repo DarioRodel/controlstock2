@@ -1,0 +1,83 @@
+{% load static %}
+<!-- TOPBAR + SIDEBAR combinados -->
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <!-- LOGO a la izquierda -->
+  <div class="topbar-logo">
+    <i class="fas fa-warehouse logo-icon"></i>
+    <span class="logo-text">Innstala</span>
+  </div>
+
+  <!-- Acciones (a la derecha) -->
+  <div class="topbar-actions">
+    <div class="topbar-icon" id="darkModeToggleTopbar">
+      <i class="fas fa-moon"></i>
+    </div>
+    <a href="#" class="topbar-icon text-decoration-none text-reset">
+      <i class="fas fa-cog"></i>
+    </a>
+    <a href="{% url 'stock:reportar_error' %}" class="topbar-icon text-decoration-none text-reset">
+      <i class="fas fa-info-circle"></i>
+    </a>
+    {% if user.is_authenticated %}
+      <a href="{% url 'perfil' %}" class="topbar-icon text-decoration-none text-reset">
+        <i class="fas fa-user"></i>
+      </a>
+    {% else %}
+      <a href="{% url 'login' %}" class="topbar-icon text-decoration-none text-reset">
+        <i class="fas fa-user"></i>
+      </a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <!-- BOTÓN DE COLLAPSE / EXPAND -->
+  <div class="sidebar-toggle" id="sidebarToggle" title="Mostrar / Ocultar menú">
+    <i class="fas fa-chevron-left"></i>
+  </div>
+
+  <a href="{% url 'stock:dashboard' %}">
+    <i class="fas fa-arrow-left"></i>
+    <span class="link-text">Inicio</span>
+  </a>
+
+  <a data-bs-toggle="collapse" href="#productosSubmenu" role="button">
+    <i class="fas fa-boxes"></i>
+    <span class="link-text">Productos</span>
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+  <div class="collapse submenu" id="productosSubmenu">
+    <a href="{% url 'stock:producto_create' %}"><span class="link-text">Crear Producto</span></a>
+    <a href="{% url 'stock:producto_list' %}"><span class="link-text">Ver Producto</span></a>
+  </div>
+
+  <a data-bs-toggle="collapse" href="#atributoSubmenu" role="button">
+    <i class="fas fa-tools"></i>
+    <span class="link-text">Atributo</span>
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+  <div class="collapse submenu" id="atributoSubmenu">
+    <a href="{% url 'stock:atributo_create' %}"><span class="link-text">Crear Atributo</span></a>
+    <a href="{% url 'stock:atributo_list' %}"><span class="link-text">Ver Atributo</span></a>
+  </div>
+
+  <a data-bs-toggle="collapse" href="#categoriasSubmenu" role="button">
+    <i class="fas fa-tags"></i>
+    <span class="link-text">Categorías</span>
+    <i class="fas fa-chevron-down ms-auto"></i>
+  </a>
+  <div class="collapse submenu" id="categoriasSubmenu">
+    <a href="{% url 'stock:categoria_create' %}"><span class="link-text">Crear Categoría</span></a>
+    <a href="{% url 'stock:categoria_list' %}"><span class="link-text">Ver Categoría</span></a>
+  </div>
+
+  <div class="reportes mt-auto">
+    <a href="{% url 'stock:reportar_error' %}">
+      <i class="fas fa-file-invoice"></i>
+      <span class="link-text">Reportes</span>
+    </a>
+  </div>
+</aside>

@@ -1,65 +1,85 @@
+/* === VARIABLES BASE === */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --danger-color: #f44336;
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --card-hover: rgba(0, 0, 0, 0.03);
+    --input-border: #e2e8f0;
+    --card-radius: 0.75rem;
+}
 
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #2196F3;
-            --accent-color: #FF9800;
-            --danger-color: #f44336;
-            --background-color: #f4f7fb;
-            --card-radius: 12px;
-            --shadow-color: rgba(0, 0, 0, 0.05);
-            --card-bg: #fff;
-            --text-color: #2d3748;
-            --card-hover: rgba(0, 0, 0, 0.03);
-        }
+/* === MODO OSCURO === */
+body[data-theme="dark"] {
+    --card-bg: #1e1e2f;
+    --text-color: #e0e0e0;
+    --card-hover: rgba(255, 255, 255, 0.08);
+    --input-border: #3d3d3d;
+}
 
-        body[data-theme="dark"] {
-            --background-color: #121212;
-            --card-bg: #1e1e2f;
-            --text-color: #e0e0e0;
-            --shadow-color: rgba(255, 255, 255, 0.05);
-            --card-hover: rgba(255, 255, 255, 0.08);
-        }
+/* === BODY GENERAL === */
+body {
+    background-color: var(--background-color, #f4f7fb);
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
 
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-            padding-top: 2rem;
-        }
+/* === CARDS DE ATRIBUTOS === */
+.card-custom {
+    background-color: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--card-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
 
-        .card-custom {
-            background-color: var(--card-bg);
-            border-radius: var(--card-radius);
-            box-shadow: 0 4px 12px -3px var(--shadow-color);
-            transition: all 0.3s ease-in-out;
-        }
+.card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
 
-        .card-custom:hover {
-            background-color: var(--card-hover);
-            transform: translateY(-4px);
-        }
+/* === TITULOS === */
+.metric-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
 
-        .metric-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
+/* === BOTONES === */
+.btn-outline-primary {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
 
-        .text-muted {
-            color: var(--secondary-color) !important;
-        }
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
 
-        .btn-custom {
-            margin-right: 0.5rem;
-        }
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
 
-        @media (max-width: 768px) {
-            .metric-title {
-                font-size: 1rem;
-            }
+.btn-danger:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+}
 
-            .text-muted {
-                font-size: 0.9rem;
-            }
-        }
+/* === TEXTO VACÍO === */
+.text-danger {
+    font-weight: 600;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .metric-title {
+        font-size: 1rem;
+    }
+
+    .card-custom {
+        padding: 1rem;
+    }
+}

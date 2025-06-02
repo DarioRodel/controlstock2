@@ -18,9 +18,17 @@ from django.contrib import admin
 # from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+# ControlStock/urls.py
+from django.contrib import admin
+from django.urls import path, include
+from control.views import RegistroUsuarioView, CustomLoginView, CustomLogoutView, PerfilView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('control.urls')),
-    path('cuentas/login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('', include('control.urls')),               # Rutas de tu app “control”
+    path('cuentas/register/', RegistroUsuarioView.as_view(), name='register'),
+    path('cuentas/login/',    CustomLoginView.as_view(),     name='login'),
+    path('cuentas/logout/',   CustomLogoutView.as_view(),    name='logout'),
+    path('cuentas/perfil/',   PerfilView.as_view(),          name='perfil'),
 ]
+

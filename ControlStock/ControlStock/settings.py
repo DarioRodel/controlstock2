@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-91^2v6g2m8i&k&q9zt51e&=$zn-oeysi9%p_udc-)n!rto+q!@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['46.202.131.81','127.0.0.1','localhost','paratugym.es','csd-controlstockdocker-juhjnz-8baeab-46-202-131-81.traefik.me']
+ALLOWED_HOSTS = ['46.202.131.81', '127.0.0.1', 'localhost', 'paratugym.es',
+                 'csd-controlstockdocker-juhjnz-8baeab-46-202-131-81.traefik.me']
 
 # Application definition
 
@@ -126,7 +127,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 STATICFILES_DIRS = [BASE_DIR / "control/static"]  # Si usas una carpeta static global
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -144,8 +144,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tucorreo@gmail.com'
 EMAIL_HOST_PASSWORD = 'tucontraseña'
+
 AUTH_USER_MODEL = 'control.UsuarioPersonalizado'
-LANGUAGE_CODE = 'es'
 LOGIN_URL = '/cuentas/login/'
 LOGIN_REDIRECT_URL = 'stock:dashboard'
 LOGOUT_REDIRECT_URL = '/'

@@ -928,3 +928,63 @@ class OpcionAtributoCreateView(LoginRequiredMixin, CreateView):
         response = super().form_valid(form)
         form.save_m2m()  # Necesario para guardar relaciones many-to-many
         return response
+# accounts/views.py
+
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import CreateView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .forms import CustomUserCreationForm
+
+
+class RegistroUsuarioView(CreateView):
+    """
+    Vista para registrar nuevos usuarios.
+    """
+    template_name = 'registration/register.html'
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Tu cuenta se ha creado correctamente. Ya puedes iniciar sesión.')
+        return response
+
+    # Si quisieras loguear al usuario automáticamente tras registrarse:
+    # def form_valid(self, form):
+    #     user = form.save()
+    #     login(self.request, user)
+    #     return redirect('dashboard')
+
+
+class CustomLoginView(LoginView):
+    """
+    Vista para el login de usuarios.
+    """
+    template_name = 'registration/login.html'
+    redirect_authenticated_user = True  # Si ya está logueado, redirige directamente
+
+
+class CustomLogoutView(LogoutView):
+    """
+    Vista para cerrar sesión.
+    """
+    next_page = reverse_lazy('login')  # A dónde redirigir tras logout
+
+
+class PerfilView(LoginRequiredMixin, TemplateView):
+    """
+    Vista de ejemplo para mostrar un perfil o dashboard sencillo.
+    Solo accesible si el usuario está autenticado.
+    """
+    template_name = 'registration/perfil.html'
+    login_url = reverse_lazy('login')  # Si no está autenticado, redirigir al login
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario'] = self.request.user
+        return context

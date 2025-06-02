@@ -1,64 +1,95 @@
+/* === GENERAL === */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-bg, #fff);
+    transition: background-color 0.3s;
+}
 
-        .delete-checkbox {
-            display: none;
-        }
+h2 {
+    color: var(--text-color, #2c3e50);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
 
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+h4 {
+    color: var(--text-color, #495057);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
 
-        .opcion-form {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
+/* === OPCIONES === */
+.opcion-form {
+    background-color: var(--light-bg, #f8f9fa);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--input-border, #dee2e6);
+}
 
-        .opcion-form:hover {
-            background-color: #f1f3f5;
-        }
+.opcion-form:hover {
+    background-color: var(--card-hover, #f1f3f5);
+}
 
-        .btn-outline-primary {
-            border-color: #0d6efd;
-            color: #0d6efd;
-        }
+/* === BOTONES === */
+.btn-outline-primary {
+    border-color: var(--primary-color, #0d6efd);
+    color: var(--primary-color, #0d6efd);
+    transition: all 0.2s ease;
+}
 
-        .btn-outline-primary:hover {
-            background-color: #0d6efd;
-            color: white;
-        }
+.btn-outline-primary:hover {
+    background-color: var(--primary-color, #0d6efd);
+    color: white;
+}
 
-        .remove-opcion {
-            transition: transform 0.2s;
-        }
+/* Botón de eliminar opción */
+.remove-opcion {
+    font-size: 0;
+    transition: transform 0.2s;
+}
 
-        .remove-opcion:hover {
-            transform: scale(1.1);
-        }
+.remove-opcion:hover {
+    transform: scale(1.1);
+}
 
-        h2 {
-            color: #2c3e50;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
+.remove-opcion i {
+    font-size: 1rem;
+}
 
-        h4 {
-            color: #495057;
-            font-weight: 500;
-            margin-bottom: 1.5rem;
-        }
+/* Ocultar checkbox de eliminación */
+.delete-checkbox {
+    display: none;
+}
 
-        .remove-opcion {
-            font-size: 0;
-        }
+/* === INPUTS === */
+.form-control {
+    border-radius: 6px;
+}
 
-        .remove-opcion i {
-            font-size: 1rem;
-        }
+/* === TEXTO VISIBLE EN FONDO CLARO === */
+.valor-negro {
+    color: #000 !important;
+}
 
-        /* Clase para forzar el color negro del texto */
-        .valor-negro {
-            color: #000 !important;
-        }
+/* === MODO OSCURO (si se usa) === */
+body[data-theme="dark"] .opcion-form {
+    background-color: #1f1f2b;
+    border-color: #3d3d3d;
+}
+
+body[data-theme="dark"] .btn-outline-primary {
+    color: #90caf9;
+    border-color: #90caf9;
+}
+
+body[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: #90caf9;
+    color: #121212;
+}
+
+body[data-theme="dark"] h2,
+body[data-theme="dark"] h4 {
+    color: #e0e0e0;
+}

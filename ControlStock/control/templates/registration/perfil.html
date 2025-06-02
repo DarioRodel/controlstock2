@@ -1,0 +1,24 @@
+<!-- control/templates/accounts/perfil.html -->
+{% block title %}Perfil{% endblock %}
+
+{% block content %}
+    <br>
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">Tu Perfil</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Usuario:</strong> {{ usuario.username }}</p>
+        <p><strong>Email:</strong> {{ usuario.email }}</p>
+        <p><strong>Rol:</strong> {{ usuario.get_rol_display }}</p>
+        <p><strong>Teléfono:</strong> {{ usuario.telefono|default:"No proporcionado" }}</p>
+        <p><strong>Departamento:</strong> {{ usuario.departamento|default:"No proporcionado" }}</p>
+        <hr>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Cerrar Sesión</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

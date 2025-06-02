@@ -1,0 +1,62 @@
+<!-- control/templates/accounts/register.html -->
+{% extends 'base.html' %}
+{% block title %}Registrar Cuenta{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Crear Cuenta</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.telefono.label_tag }}
+            {{ form.telefono }}
+            {{ form.telefono.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.departamento.label_tag }}
+            {{ form.departamento }}
+            {{ form.departamento.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.rol.label_tag }}
+            {{ form.rol }}
+            {{ form.rol.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+          </div>
+
+          <button type="submit" class="btn btn-success w-100">Registrarse</button>
+        </form>
+        <hr>
+        <p class="text-center">
+          ¿Ya tienes cuenta? <a href="{% url 'login' %}">Iniciar Sesión</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
